@@ -142,7 +142,7 @@ export default class Connect extends Component {
     const altitude = (isConnecting ? 300 : 100) * 1000;
     const { location } = this.props.connection;
     const map = (<Map animate={ !this.state.isFirstPass }
-      location={ location || [0, 0] }
+      location={ isDisconnected ? [0, 0] : [34, 34] } // location || [0, 0]
       altitude= { altitude }
       markerImagePath= { isConnected
         ? './assets/images/location-marker-secure.svg'
