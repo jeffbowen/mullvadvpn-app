@@ -1,8 +1,8 @@
 // @flow
 
-import path from 'path';
 import React, { Component } from 'react';
-import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker } from "react-simple-maps";
+import { Motion, spring } from 'react-motion';
+import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker } from 'react-simple-maps';
 import cheapRuler from 'cheap-ruler';
 
 import type { Coordinate2d } from '../types';
@@ -11,19 +11,17 @@ export default class Map extends Component {
   props: {
     animate: boolean,
     location: Coordinate2d,
-    altitude: number,
+    zoom: number,
     markerImagePath: string,
   }
 
   render() {
-
     // const mapBounds = this.calculateMapBounds(this.props.location, this.props.altitude);
     // const mapBoundsOptions = { offset: [0, -113], animate: this.props.animate };
 
     const worldJSON =  './assets/geo/world-countries.json';
-
-    const projection = {
-      scale: 300
+    const projectionConfig = {
+      scale: 205
     };
 
     const mapStyle = {
@@ -32,33 +30,47 @@ export default class Map extends Component {
       backgroundColor: '#191A1A'
     };
 
-    return <ComposableMap style={ mapStyle } projectionConfig={ projection }>
-      <ZoomableGroup disablePanning={ true }>
-        <Geographies geographyUrl={ worldJSON }>
-          {(geographies, projection) => geographies.map((geography, i) => (
-            <Geography
-              key={ `geography-${i}` }
-              geography={ geography }
-              projection={ projection }
-              style={{
-                default: {
-                  fill: '#192C44',
-                  stroke: '#191A1A',
-                  strokeWidth: '1px',
-                }
-              }}
-            />
-          ))}
-        </Geographies>
-        <Markers>
-          <Marker
-            key={ 'marker' }
-            marker={{ coordinates: this.convertToMapCoordinate(this.props.location) }}>
-            <image xlinkHref={ this.props.markerImagePath } />
-          </Marker>
-        </Markers>
-      </ZoomableGroup>
-    </ComposableMap>;
+    const geographyStyle = {
+      default: {
+        fill: '#192C44',
+        stroke: '#191A1A',
+        strokeWidth: '1px',
+      }
+    };
+
+    const motionStyle = {
+      zoom: spring(this.props.zoom, {stiffness: 210, damping: 20}),
+      x: spring(this.props.location[0], {stiffness: 210, damping: 20}),
+      y: spring(this.props.location[1], {stiffness: 210, damping: 20}),
+    };
+
+    return (
+      <Motion defaultStyle={{ zoom: 1, x: 0, y: 20 }} style={ motionStyle }>
+        {({zoom, x, y}) => (
+          <ComposableMap style={ mapStyle } projectionConfig={ projectionConfig }>
+            <ZoomableGroup center={ [x, y] } zoom={ zoom } disablePanning={ true }>
+              <Geographies geographyUrl={ worldJSON }>
+                {(geographies, projection) => geographies.map((geography, i) => (
+                  <Geography
+                    key={ `geography-${i}` }
+                    geography={ geography }
+                    projection={ projection }
+                    style={ geographyStyle }
+                  />
+                ))}
+              </Geographies>
+              <Markers>
+                <Marker
+                  key={ 'marker' }
+                  marker={{ coordinates: this.convertToMapCoordinate(this.props.location) }}>
+                  <image xlinkHref={ this.props.markerImagePath } />
+                </Marker>
+              </Markers>
+            </ZoomableGroup>
+          </ComposableMap>
+        )}
+      </Motion>
+    );
   }
 
   calculateMapBounds(center: Coordinate2d, altitude: number): [Coordinate2d, Coordinate2d] {

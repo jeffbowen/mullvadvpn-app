@@ -139,11 +139,11 @@ export default class Connect extends Component {
     case 'disconnected': isDisconnected = true; break;
     }
 
-    const altitude = (isConnecting ? 300 : 100) * 1000;
-    const { location } = this.props.connection;
+    const zoom = (isConnecting ? 1 : 2);
+    // const { location } = this.props.connection;
     const map = (<Map animate={ !this.state.isFirstPass }
-      location={ isDisconnected ? [0, 0] : [34, 34] } // location || [0, 0]
-      altitude= { altitude }
+      location={ isDisconnected ? [8.5417, 47.3769] : [-122.4194, 37.7749] } // location || [0, 0]
+      zoom= { zoom }
       markerImagePath= { isConnected
         ? './assets/images/location-marker-secure.svg'
         : './assets/images/location-marker-unsecure.svg' }
