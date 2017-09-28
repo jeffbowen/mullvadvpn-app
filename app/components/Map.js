@@ -3,13 +3,11 @@
 import React, { Component } from 'react';
 import { Motion, spring } from 'react-motion';
 import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker } from 'react-simple-maps';
-import cheapRuler from 'cheap-ruler';
 
 import type { Coordinate2d } from '../types';
 
 export default class Map extends Component {
   props: {
-    animate: boolean,
     location: Coordinate2d,
     zoom: number,
     markerImagePath: string,
@@ -71,16 +69,5 @@ export default class Map extends Component {
         )}
       </Motion>
     );
-  }
-
-  calculateMapBounds(center: Coordinate2d, altitude: number): [Coordinate2d, Coordinate2d] {
-    const bounds = cheapRuler(center[0], 'meters').bufferPoint(center, altitude);
-    // convert [lat,lng] bounds to [lng,lat]
-    return [ [bounds[1], bounds[0]], [bounds[3], bounds[2]] ];
-  }
-
-  convertToMapCoordinate(pos: Coordinate2d): Coordinate2d {
-    // convert [lat,lng] bounds to [lng,lat]
-    return [pos[1], pos[0]];
   }
 }
