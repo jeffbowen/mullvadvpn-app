@@ -6,19 +6,21 @@ import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker, 
 
 import type { Coordinate2d } from '../types';
 
+export type MapProps = {
+  location: Coordinate2d,
+  zoom: number,
+  markerImagePath: string,
+};
+
 export default class Map extends Component {
-  props: {
-    location: Coordinate2d,
-    zoom: number,
-    markerImagePath: string,
-  }
+  props: MapProps
 
   state: {
     initialZoom: number,
     initialLocation: [number, number]
   }
 
-  constructor(props) {
+  constructor(props: MapProps) {
     super(props);
     this.state = {
       initialZoom: props.zoom,
@@ -30,8 +32,9 @@ export default class Map extends Component {
     const worldJSON =  './assets/geo/world-countries.json';
     const projectionConfig = {
       scale: 6000,
-      // yOffset: -113,
-      // presicion: 0.05
+      // doesn't work properly for some reason
+      // see: https://github.com/zcreativelabs/react-simple-maps/issues/23
+      // yOffset: -150 / this.props.zoom
     };
 
     const mapStyle = {
@@ -48,9 +51,7 @@ export default class Map extends Component {
       }
     };
 
-    // inverse coordinate order for map
     const lonlat = [this.props.location[1], this.props.location[0]];
-
     const initialStyle = {
       zoom: this.state.initialZoom,
       x: this.state.initialLocation[1],
@@ -66,7 +67,7 @@ export default class Map extends Component {
     return (
       <Motion defaultStyle={ initialStyle } style={ motionStyle }>
         {({zoom, x, y}) => (
-          <ComposableMap width={800} height={450} style={ mapStyle } projectionConfig={ projectionConfig }>
+          <ComposableMap width={ 800 } height={ 450 } style={ mapStyle } projectionConfig={ projectionConfig }>
             <ZoomableGroup center={ [x, y] } zoom={ zoom } disablePanning={ true }>
               <Geographies geographyUrl={ worldJSON }>
                 {(geographies, projection) => geographies.map((geography, i) => (
