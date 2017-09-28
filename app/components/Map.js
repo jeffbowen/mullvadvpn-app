@@ -14,9 +14,6 @@ export default class Map extends Component {
   }
 
   render() {
-    // const mapBounds = this.calculateMapBounds(this.props.location, this.props.altitude);
-    // const mapBoundsOptions = { offset: [0, -113], animate: this.props.animate };
-
     const worldJSON =  './assets/geo/world-countries.json';
     const projectionConfig = {
       scale: 205
@@ -60,7 +57,7 @@ export default class Map extends Component {
               <Markers>
                 <Marker
                   key={ 'marker' }
-                  marker={{ coordinates: this.convertToMapCoordinate(this.props.location) }}>
+                  marker={{ coordinates: this.props.location }}>
                   <image xlinkHref={ this.props.markerImagePath } />
                 </Marker>
               </Markers>
