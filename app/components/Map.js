@@ -78,10 +78,9 @@ export default class Map extends Component {
                 ))}
               </Geographies>
               <Markers>
-                <Marker
-                  key={ 'marker' }
-                  marker={{ coordinates: lonlat }}>
-                  <image xlinkHref={ this.props.markerImagePath } />
+                <Marker key={ 'marker' } marker={{ coordinates: lonlat }}>
+                  { /* TODO: find the way to use relative x/y (i.e -50%) */  }
+                  <image x="-30" y="-30" xlinkHref={ this.props.markerImagePath } />
                 </Marker>
               </Markers>
             </ZoomableGroup>
