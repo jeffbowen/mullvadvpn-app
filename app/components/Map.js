@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { Motion, spring } from 'react-motion';
-import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker } from 'react-simple-maps';
+import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker, Annotation } from 'react-simple-maps';
 
 import type { Coordinate2d } from '../types';
 
@@ -13,14 +13,29 @@ export default class Map extends Component {
     markerImagePath: string,
   }
 
+  state: {
+    initialZoom: number,
+    initialLocation: [number, number]
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      initialZoom: props.zoom,
+      initialLocation: props.location
+    };
+  }
+
   render() {
     const worldJSON =  './assets/geo/world-countries.json';
     const projectionConfig = {
-      scale: 205
+      scale: 6000,
+      // yOffset: -113,
+      // presicion: 0.05
     };
 
     const mapStyle = {
-      width: '800px',
+      width: '100%',
       height: '100%',
       backgroundColor: '#191A1A'
     };
@@ -33,16 +48,25 @@ export default class Map extends Component {
       }
     };
 
+    // inverse coordinate order for map
+    const lonlat = [this.props.location[1], this.props.location[0]];
+
+    const initialStyle = {
+      zoom: this.state.initialZoom,
+      x: this.state.initialLocation[1],
+      y: this.state.initialLocation[0]
+    };
+
     const motionStyle = {
       zoom: spring(this.props.zoom, {stiffness: 210, damping: 20}),
-      x: spring(this.props.location[0], {stiffness: 210, damping: 20}),
-      y: spring(this.props.location[1], {stiffness: 210, damping: 20}),
+      x: spring(lonlat[0], {stiffness: 210, damping: 20}),
+      y: spring(lonlat[1], {stiffness: 210, damping: 20}),
     };
 
     return (
-      <Motion defaultStyle={{ zoom: 1, x: 0, y: 20 }} style={ motionStyle }>
+      <Motion defaultStyle={ initialStyle } style={ motionStyle }>
         {({zoom, x, y}) => (
-          <ComposableMap style={ mapStyle } projectionConfig={ projectionConfig }>
+          <ComposableMap width={800} height={450} style={ mapStyle } projectionConfig={ projectionConfig }>
             <ZoomableGroup center={ [x, y] } zoom={ zoom } disablePanning={ true }>
               <Geographies geographyUrl={ worldJSON }>
                 {(geographies, projection) => geographies.map((geography, i) => (
@@ -50,14 +74,13 @@ export default class Map extends Component {
                     key={ `geography-${i}` }
                     geography={ geography }
                     projection={ projection }
-                    style={ geographyStyle }
-                  />
+                    style={ geographyStyle } />
                 ))}
               </Geographies>
               <Markers>
                 <Marker
                   key={ 'marker' }
-                  marker={{ coordinates: this.props.location }}>
+                  marker={{ coordinates: lonlat }}>
                   <image xlinkHref={ this.props.markerImagePath } />
                 </Marker>
               </Markers>
