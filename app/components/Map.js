@@ -108,7 +108,7 @@ export default class Map extends Component {
         {({zoom, x, y}) => (
           <ComposableMap width={ 800 } height={ 450 } style={ mapStyle } projectionConfig={ projectionConfig }>
             <ZoomableGroup center={ [x, y] } zoom={ zoom } disablePanning={ false }>
-              <Geographies geographyUrl={ './assets/geo/geometry.json' }>
+              <Geographies geography={ './assets/geo/geometry.json' }>
                 {(geographies, projection) => geographies.map((geography, i) => (
                   <Geography
                     key={ `geography-${i}` }

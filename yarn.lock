@@ -6206,9 +6206,9 @@ react-router@^4.1.1, react-router@^4.2.0:
     prop-types "^15.5.4"
     warning "^3.0.0"
 
-react-simple-maps@^0.8.3:
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/react-simple-maps/-/react-simple-maps-0.8.3.tgz#a640f0200dbebb9879affe5e5975bdb18af72c03"
+react-simple-maps@^0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/react-simple-maps/-/react-simple-maps-0.10.1.tgz#4d884ac24a55c327a86076113f3890e61c92906a"
   dependencies:
     d3-geo "1.6.3"
     d3-geo-projection "1.2.2"
