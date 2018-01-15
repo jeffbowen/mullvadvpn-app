@@ -6013,7 +6013,7 @@ rabin-bindings@~1.7.4:
     nan "^2.8.0"
     prebuild-install "^2.3.0"
 
-raf@^3.1.0, raf@^3.4.0:
+raf@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/raf/-/raf-3.4.0.tgz#a28876881b4bc2ca9117d4138163ddb80f781575"
   dependencies:
@@ -6089,14 +6089,6 @@ react-dom@^16.0.0:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.0"
-
-react-motion@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/react-motion/-/react-motion-0.5.1.tgz#b90631408175ab1668e173caccd66d41a44f4592"
-  dependencies:
-    performance-now "^0.2.0"
-    prop-types "^15.5.8"
-    raf "^3.1.0"
 
 react-native-windows@^0.50.0-rc.2:
   version "0.50.0"
