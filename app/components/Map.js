@@ -3,6 +3,8 @@
 import React, { Component } from 'react';
 import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker } from 'react-simple-maps';
 
+import { geoTimes } from 'd3-geo-projection';
+
 import countriesJSON from '../assets/geo/countries.geo.json';
 import citiesJSON from '../assets/geo/cities.geo.json';
 
@@ -21,6 +23,13 @@ export type MapProps = {
 export default class Map extends Component {
   props: MapProps;
 
+  state = {
+    bounds: {
+      width: 320,
+      height: 494
+    }
+  };
+
   render() {
     const projectionConfig = {
       scale: 3000,
@@ -28,6 +37,9 @@ export default class Map extends Component {
       // see: https://github.com/zcreativelabs/react-simple-maps/issues/23
       // yOffset: -150 / this.props.zoom
     };
+
+    const { bounds } = this.state;
+    const projection = this.getProjection(bounds.width, bounds.height, projectionConfig);
 
     const mapStyle = {
       width: '100%',
@@ -47,69 +59,51 @@ export default class Map extends Component {
       pressed: defaultGeographyStyle
     };
 
-    const markerLocation = swapLatLon(this.props.location);
     const cameraLocation = swapLatLon(this.props.location);
+    const zoom = this.props.zoomIn ? 2 : 1;
 
     const userMarker = (
-      <Marker key={ 'pin-marker' } marker={{ coordinates: markerLocation }}>
+      <Marker key={ 'pin-marker' } marker={{ coordinates: cameraLocation }}>
         <image x="-30" y="-30" href={ this.props.markerImagePath } />
       </Marker>
     );
 
-    const CountryMarker = ({ item, projection, zoom, ...otherProps }) => {
-      if(projection && zoom && this.isWithinVisibleBounds(item.geometry.coordinates, projection, zoom)) {
-        return (
-          <Marker marker={{ coordinates: item.geometry.coordinates }}
-            projection={ projection }
-            zoom={ zoom }
-            { ...otherProps }>
-            <text fill="rgba(255,255,255,.4)" fontSize="22" textAnchor="middle">
-              { item.properties.name }
-            </text>
-          </Marker>
-        );
-      } else {
-        return null;
-      }
-    };
+    const boundsFilter = item => this.isWithinVisibleBounds(
+      item.geometry.coordinates,
+      this.state.bounds,
+      projection,
+      zoom
+    );
 
-    const CityMarker = ({ item, projection, zoom, ...otherProps }) => {
-      if(projection && zoom && this.isWithinVisibleBounds(item.geometry.coordinates, projection, zoom)) {
+    const countryMarkers = this.props.zoomIn ? [] :
+      countriesJSON.features.filter(boundsFilter).map((item) => (
+        <Marker key={ `country-${item.id}` } marker={{ coordinates: item.geometry.coordinates }}>
+          <text fill="rgba(255,255,255,.4)" fontSize="22" textAnchor="middle">
+            { item.properties.name }
+          </text>
+        </Marker>
+      ));
+
+    const cityMarkers = this.props.zoomIn ?
+      citiesJSON.features.filter(boundsFilter).map((item) => {
         return (
-          <Marker
-            key={ `b${item.id}` }
-            marker={{ coordinates: item.geometry.coordinates }}
-            projection={ projection }
-            zoom={ zoom }
-            { ...otherProps }>
+          <Marker key={ `city-${item.id}` } marker={{ coordinates: item.geometry.coordinates }}>
             <circle r="2" fill="rgba(255,255,255,.8)" />
             <text x="0" y="-10" fill="rgba(255,255,255,.8)" fontSize="14" textAnchor="middle">
               { item.properties.name }
             </text>
           </Marker>
         );
-      } else {
-        return null;
-      }
-    };
-
-    const countryMarkers = this.props.zoomIn ? [] : countriesJSON.features.map(item => (
-      <CountryMarker key={ `a${item.id}` } item={ item } />
-    ));
-
-    const cityMarkers = this.props.zoomIn ? citiesJSON.features.map((item) => (
-      <CityMarker key={ `b${item.id}` } item={ item } />
-    )) : [];
-
-    const zoomLevel = this.props.zoomIn ? 2 : 1;
+      }) : [];
 
     return (
       <ComposableMap
-        width={ 320 }
-        height={ 494 }
+        width={ bounds.width }
+        height={ bounds.height }
         style={ mapStyle }
+        projection={ this.getProjection }
         projectionConfig={ projectionConfig }>
-        <ZoomableGroup center={ cameraLocation } zoom={ zoomLevel } disablePanning={ false }>
+        <ZoomableGroup center={ cameraLocation } zoom={ zoom } disablePanning={ false }>
           <Geographies geography={ './assets/geo/geometry.json' }>
             {(geographies, projection) => geographies.map((geography, i) => (
               <Geography
@@ -127,15 +121,40 @@ export default class Map extends Component {
     );
   }
 
-  isWithinVisibleBounds(coordinate: [number, number], projection: Function, zoom: number) {
-    const bounds = { width: 320, height: 494 };
-    const center = projection()(swapLatLon(this.props.location));
+  getProjection(width: number, height: number, config: {
+    scale?: number,
+    xOffset?: number,
+    yOffset?: number,
+    rotation?: [number, number, number],
+    precision?: number,
+  }) {
+    const scale = config.scale || 160;
+    const xOffset = config.xOffset || 0;
+    const yOffset = config.yOffset || 0;
+    const rotation = config.rotation || [0, 0, 0];
+    const precision = config.precision || 0.1;
+
+    return geoTimes()
+      .scale(scale)
+      .translate([ xOffset + width / 2, yOffset + height / 2 ])
+      .rotate(rotation)
+      .precision(precision);
+  }
+
+
+  isWithinVisibleBounds(
+    coordinate: [number, number],
+    bounds: { width: number, height: number },
+    projection: ([number, number]) => [number, number],
+    zoom: number)
+  {
+    const center = projection(swapLatLon(this.props.location));
     const halfWidth = bounds.width * 0.5 / zoom;
     const halfHeight = bounds.height * 0.5 / zoom;
 
     const northWest = [center[0] - halfWidth, center[1] - halfHeight];
     const southEast = [center[0] + halfWidth, center[1] + halfHeight];
-    const markerPos = projection()(coordinate);
+    const markerPos = projection(coordinate);
 
     return markerPos[0] >= northWest[0] && markerPos[0] <= southEast[0] &&
       markerPos[1] >= northWest[1] && markerPos[1] <= southEast[1];
