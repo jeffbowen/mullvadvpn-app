@@ -134,7 +134,7 @@ export default class Connect extends Component {
     }
 
     const map = (
-      <Map center={ [14.5058, 46.0569] }
+      <Map center={ isDisconnected ? [14.5058, 46.0569] : [-3.703790, 40.416775] }
         zoomIn={ isConnected }
         markerImagePath={ isConnected
           ? './assets/images/location-marker-secure.svg'
