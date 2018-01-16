@@ -14,12 +14,12 @@ function swapLatLon(latlon: Coordinate2d): Coordinate2d {
 
 export type MapProps = {
   location: Coordinate2d,
-  zoom: number,
+  zoomIn: boolean,
   markerImagePath: string,
 };
 
 export default class Map extends Component {
-  props: MapProps
+  props: MapProps;
 
   render() {
     const projectionConfig = {
@@ -56,40 +56,60 @@ export default class Map extends Component {
       </Marker>
     );
 
-    const IS_MARKER_IN_VISIBLE_BOUNDARIES = () => {
-      return false;
+    const CountryMarker = ({ item, projection, zoom, ...otherProps }) => {
+      if(projection && zoom && this.isWithinVisibleBounds(item.geometry.coordinates, projection, zoom)) {
+        return (
+          <Marker marker={{ coordinates: item.geometry.coordinates }}
+            projection={ projection }
+            zoom={ zoom }
+            { ...otherProps }>
+            <text fill="rgba(255,255,255,.4)" fontSize="22" textAnchor="middle">
+              { item.properties.name }
+            </text>
+          </Marker>
+        );
+      } else {
+        return null;
+      }
     };
 
-    const CountryMarker = ({ item, projection, ...otherProps }) => {
-      const translation = projection()(item.geometry.coordinates);
-
-      return !IS_MARKER_IN_VISIBLE_BOUNDARIES(translation) ? null : (
-        <Marker marker={{ coordinates: item.geometry.coordinates }}
-          projection={ projection }
-          { ...otherProps }>
-          <text fill="rgba(255,255,255,.4)" fontSize="22" textAnchor="middle">
-            { item.properties.name }
-          </text>
-        </Marker>
-      );
+    const CityMarker = ({ item, projection, zoom, ...otherProps }) => {
+      if(projection && zoom && this.isWithinVisibleBounds(item.geometry.coordinates, projection, zoom)) {
+        return (
+          <Marker
+            key={ `b${item.id}` }
+            marker={{ coordinates: item.geometry.coordinates }}
+            projection={ projection }
+            zoom={ zoom }
+            { ...otherProps }>
+            <circle r="2" fill="rgba(255,255,255,.8)" />
+            <text x="0" y="-10" fill="rgba(255,255,255,.8)" fontSize="14" textAnchor="middle">
+              { item.properties.name }
+            </text>
+          </Marker>
+        );
+      } else {
+        return null;
+      }
     };
 
-    const countryMarkers = countriesJSON.features.map(item => (
+    const countryMarkers = this.props.zoomIn ? [] : countriesJSON.features.map(item => (
       <CountryMarker key={ `a${item.id}` } item={ item } />
     ));
 
-    const cityMarkers = [] || citiesJSON.features.map((item) => (
-      <Marker key={ `b${item.id}` } marker={{ coordinates: item.geometry.coordinates }}>
-        <circle r="2" fill="rgba(255,255,255,.8)" />
-        <text x="0" y="-10" fill="rgba(255,255,255,.8)" fontSize="14" textAnchor="middle">
-          { item.properties.name }
-        </text>
-      </Marker>
-    ));
+    const cityMarkers = this.props.zoomIn ? citiesJSON.features.map((item) => (
+      <CityMarker key={ `b${item.id}` } item={ item } />
+    )) : [];
+
+    const zoomLevel = this.props.zoomIn ? 2 : 1;
 
     return (
-      <ComposableMap width={ 800 } height={ 450 } style={ mapStyle } projectionConfig={ projectionConfig }>
-        <ZoomableGroup center={ cameraLocation } zoom={ this.props.zoom } disablePanning={ false }>
+      <ComposableMap
+        width={ 320 }
+        height={ 494 }
+        style={ mapStyle }
+        projectionConfig={ projectionConfig }>
+        <ZoomableGroup center={ cameraLocation } zoom={ zoomLevel } disablePanning={ false }>
           <Geographies geography={ './assets/geo/geometry.json' }>
             {(geographies, projection) => geographies.map((geography, i) => (
               <Geography
@@ -100,10 +120,24 @@ export default class Map extends Component {
             ))}
           </Geographies>
           <Markers>
-            { countryMarkers.concat(cityMarkers, [userMarker]) }
+            { [].concat(cityMarkers, countryMarkers, userMarker) }
           </Markers>
         </ZoomableGroup>
       </ComposableMap>
     );
   }
+
+  isWithinVisibleBounds(coordinate: [number, number], projection: Function, zoom: number) {
+    const bounds = { width: 320, height: 494 };
+    const center = projection()(swapLatLon(this.props.location));
+    const halfWidth = bounds.width * 0.5 / zoom;
+    const halfHeight = bounds.height * 0.5 / zoom;
+
+    const northWest = [center[0] - halfWidth, center[1] - halfHeight];
+    const southEast = [center[0] + halfWidth, center[1] + halfHeight];
+    const markerPos = projection()(coordinate);
+
+    return markerPos[0] >= northWest[0] && markerPos[0] <= southEast[0] &&
+      markerPos[1] >= northWest[1] && markerPos[1] <= southEast[1];
+  };
 }
