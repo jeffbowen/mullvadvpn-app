@@ -16,9 +16,13 @@ with fiona.open(input_path) as source:
         # convert country polygon to centroid
         geometry.update(mapping(shape(geometry).centroid))
 
-        props = feat["properties"]
+        # lowercase all keys
+        props = dict((k.lower(), v) for k, v in feat["properties"].iteritems())
+
         for k in frozenset(props) - props_to_keep:
             del props[k]
+
+        feat["properties"] = props
 
         features.append(feat)
 
