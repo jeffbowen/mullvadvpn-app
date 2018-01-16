@@ -1,2 +1,2 @@
-fiona==1.7.9.post1
-shapely==1.6.1
+fiona==1.7.11
+shapely==1.6.3
