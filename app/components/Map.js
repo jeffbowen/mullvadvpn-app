@@ -10,12 +10,8 @@ import citiesJSON from '../assets/geo/cities.geo.json';
 
 import type { Coordinate2d } from '../types';
 
-function swapLatLon(latlon: Coordinate2d): Coordinate2d {
-  return [latlon[1], latlon[0]];
-}
-
 export type MapProps = {
-  location: Coordinate2d,
+  center: Coordinate2d, // longitude, latitude
   zoomIn: boolean,
   markerImagePath: string,
 };
@@ -59,11 +55,9 @@ export default class Map extends Component {
       pressed: defaultGeographyStyle
     };
 
-    const cameraLocation = swapLatLon(this.props.location);
     const zoom = this.props.zoomIn ? 2 : 1;
-
     const userMarker = (
-      <Marker key={ 'pin-marker' } marker={{ coordinates: cameraLocation }}>
+      <Marker key={ 'pin-marker' } marker={{ coordinates: this.props.center }}>
         <image x="-30" y="-30" href={ this.props.markerImagePath } />
       </Marker>
     );
@@ -103,7 +97,7 @@ export default class Map extends Component {
         style={ mapStyle }
         projection={ this.getProjection }
         projectionConfig={ projectionConfig }>
-        <ZoomableGroup center={ cameraLocation } zoom={ zoom } disablePanning={ false }>
+        <ZoomableGroup center={ this.props.center } zoom={ zoom } disablePanning={ false }>
           <Geographies geography={ './assets/geo/geometry.json' }>
             {(geographies, projection) => geographies.map((geography, i) => (
               <Geography
@@ -148,7 +142,7 @@ export default class Map extends Component {
     projection: ([number, number]) => [number, number],
     zoom: number)
   {
-    const center = projection(swapLatLon(this.props.location));
+    const center = projection(this.props.center);
     const halfWidth = bounds.width * 0.5 / zoom;
     const halfHeight = bounds.height * 0.5 / zoom;
 
