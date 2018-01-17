@@ -14,6 +14,7 @@
     "d3-geo-projection": "^2.3.2",
     "electron-log": "^2.2.8",
     "electron-sudo": "https://github.com/eriklarko/electron-sudo.git",
+    "geojson-rbush": "^2.2.1",
     "history": "^4.6.1",
     "jsonrpc-lite": "^1.2.3",
     "mkdirp": "^0.5.1",

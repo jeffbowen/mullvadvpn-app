@@ -26,6 +26,16 @@
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/7zip/-/7zip-0.0.6.tgz#9cafb171af82329490353b4816f03347aa150a30"
 
+"@turf/helpers@^5.1.5":
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-5.1.5.tgz#153405227ab933d004a5bb9641a9ed999fcbe0cf"
+
+"@turf/meta@*":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@turf/meta/-/meta-5.2.0.tgz#3b1ad485ee0c3b0b1775132a32c384d53e4ba53d"
+  dependencies:
+    "@turf/helpers" "^5.1.5"
+
 "@types/lodash@^4.14.64", "@types/lodash@^4.14.78":
   version "4.14.91"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.91.tgz#794611b28056d16b5436059c6d800b39d573cd3a"
@@ -3531,6 +3541,12 @@ gauge@~2.7.3:
     string-width "^1.0.1"
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
+
+geojson-rbush@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/geojson-rbush/-/geojson-rbush-2.2.1.tgz#b1703e59c88ff7728be74e73bab450813aa3ed84"
+  dependencies:
+    "@turf/meta" "*"
 
 get-caller-file@^1.0.1:
   version "1.0.2"
