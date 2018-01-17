@@ -4,9 +4,10 @@ import React, { Component } from 'react';
 import { ComposableMap, ZoomableGroup, Geographies, Geography, Markers, Marker } from 'react-simple-maps';
 
 import { geoTimes } from 'd3-geo-projection';
+import geojsonRbush from 'geojson-rbush';
 
-import countriesJSON from '../assets/geo/countries.geo.json';
-import citiesJSON from '../assets/geo/cities.geo.json';
+import countriesRbushJson from '../assets/geo/countries.rbush.json';
+import citiesRbushJson from '../assets/geo/cities.rbush.json';
 
 import type { Coordinate2d } from '../types';
 
@@ -25,6 +26,9 @@ export default class Map extends Component {
       height: 494
     }
   };
+
+  _countryRbush = geojsonRbush().fromJSON(countriesRbushJson);
+  _cityRbush = geojsonRbush().fromJSON(citiesRbushJson);
 
   render() {
     const projectionConfig = {
@@ -62,15 +66,27 @@ export default class Map extends Component {
       </Marker>
     );
 
-    const boundsFilter = item => this.isWithinVisibleBounds(
-      item.geometry.coordinates,
+    const bbox = this._getVisibleBoundingBox(
+      this.props.center,
       this.state.bounds,
       projection,
       zoom
     );
 
+    console.log('visibleBbox:', bbox);
+
+    const match = {
+      minX: bbox[0],
+      maxX: bbox[1],
+      minY: bbox[2],
+      maxY: bbox[3],
+    };
+
+    const visibleCountries = this._countryRbush.search(match);
+    const visibleCities = this._cityRbush.search(match);
+
     const countryMarkers = this.props.zoomIn ? [] :
-      countriesJSON.features.filter(boundsFilter).map((item) => (
+      visibleCountries.features.map((item) => (
         <Marker key={ `country-${item.id}` } marker={{ coordinates: item.geometry.coordinates }}>
           <text fill="rgba(255,255,255,.4)" fontSize="22" textAnchor="middle">
             { item.properties.name }
@@ -79,7 +95,7 @@ export default class Map extends Component {
       ));
 
     const cityMarkers = this.props.zoomIn ?
-      citiesJSON.features.filter(boundsFilter).map((item) => {
+      visibleCities.features.map((item) => {
         return (
           <Marker key={ `city-${item.id}` } marker={{ coordinates: item.geometry.coordinates }}>
             <circle r="2" fill="rgba(255,255,255,.8)" />
@@ -135,22 +151,20 @@ export default class Map extends Component {
       .precision(precision);
   }
 
-
-  isWithinVisibleBounds(
-    coordinate: [number, number],
+  _getVisibleBoundingBox(
+    centerCoordinate: [number, number],
     bounds: { width: number, height: number },
     projection: ([number, number]) => [number, number],
-    zoom: number)
-  {
-    const center = projection(this.props.center);
+    zoom: number
+  ) {
+    const center = projection(centerCoordinate);
     const halfWidth = bounds.width * 0.5 / zoom;
     const halfHeight = bounds.height * 0.5 / zoom;
 
-    const northWest = [center[0] - halfWidth, center[1] - halfHeight];
-    const southEast = [center[0] + halfWidth, center[1] + halfHeight];
-    const markerPos = projection(coordinate);
+    const northWest = projection.invert([center[0] - halfWidth, center[1] - halfHeight]);
+    const southEast = projection.invert([center[0] + halfWidth, center[1] + halfHeight]);
 
-    return markerPos[0] >= northWest[0] && markerPos[0] <= southEast[0] &&
-      markerPos[1] >= northWest[1] && markerPos[1] <= southEast[1];
-  };
+    return projection.invert(northWest)
+      .concat(projection.invert(southEast));
+  }
 }
