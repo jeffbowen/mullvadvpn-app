@@ -9,16 +9,20 @@ export type TrayIconType = 'unsecured' | 'securing' | 'secured';
 export default class TrayIconManager {
 
   _animation: ?KeyframeAnimation;
+  _iconColor: boolean;
   _iconType: TrayIconType;
+  _tray: Tray;
 
-  constructor(tray: Tray, initialType: TrayIconType) {
-    const animation = this._createAnimation();
+  constructor(tray: Tray, initialColor: boolean, initialType: TrayIconType) {
+    const animation = this._createAnimation(initialColor);
     animation.onFrame = (img) => tray.setImage(img);
     animation.reverse = this._isReverseAnimation(initialType);
     animation.play({ advanceTo: 'end' });
 
     this._animation = animation;
+    this._iconColor = initialColor;
     this._iconType = initialType;
+    this._tray = tray;
   }
 
   destroy() {
@@ -28,9 +32,10 @@ export default class TrayIconManager {
     }
   }
 
-  _createAnimation(): KeyframeAnimation {
+  _createAnimation(color: boolean): KeyframeAnimation {
     const basePath = path.join(path.resolve(__dirname, '..'), 'assets/images/menubar icons');
-    const filePath = path.join(basePath, 'lock-{}.png');
+    const fileName = color ? 'lock-{}.png' : 'lock-bw-{}.png';
+    const filePath = path.join(basePath, fileName);
     const animation = KeyframeAnimation.fromFilePattern(filePath, [1, 10]);
     animation.speed = 100;
     return animation;
@@ -38,6 +43,16 @@ export default class TrayIconManager {
 
   _isReverseAnimation(type: TrayIconType): bool {
     return type === 'unsecured';
+  }
+
+  set iconColor(color: boolean) {
+    const animation = this._createAnimation(color);
+    // TODO: Find a more DRY approach to updating the animation
+    animation.onFrame = (img) => this._tray.setImage(img);
+    animation.reverse = this._isReverseAnimation(this._iconType);
+    animation.play({ advanceTo: 'end' });
+    this._animation = animation;
+    this._iconColor = color;
   }
 
   get iconType(): TrayIconType {

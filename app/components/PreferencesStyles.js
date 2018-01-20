@@ -42,8 +42,8 @@ export default {
     },
     preferences__content: {
       flexDirection: 'column',
-      flexGrow: 1,
-      flexShrink: 1,
+      flexGrow: 0,
+      flexShrink: 0,
       flexBasis: 'auto',
     },
     preferences__cell: {

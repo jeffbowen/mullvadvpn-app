@@ -9,7 +9,8 @@ import type { ReduxState, ReduxDispatch } from '../redux/store';
 import type { SharedRouteProps } from '../routes';
 
 const mapStateToProps = (state: ReduxState) => ({
-  allowLan: state.settings.allowLan
+  allowLan: state.settings.allowLan,
+  colorIcons: state.settings.colorIcons
 });
 
 const mapDispatchToProps = (dispatch: ReduxDispatch, props: SharedRouteProps) => {
@@ -19,6 +20,9 @@ const mapDispatchToProps = (dispatch: ReduxDispatch, props: SharedRouteProps) =>
     onClose: () => pushHistory('/settings'),
     onChangeAllowLan: (allowLan) => {
       backend.setAllowLan(allowLan);
+    },
+    onChangeColorIcons: (colorIcons) => {
+      backend.setColorIcons(colorIcons);
     },
   };
 };

@@ -378,12 +378,13 @@ const appDelegate = {
     // setup NSEvent monitor to fix inconsistent window.blur
     // see https://github.com/electron/electron/issues/8689
     const { NSEventMonitor, NSEventMask } = require('nseventmonitor');
-    const trayIconManager = new TrayIconManager(tray, 'unsecured');
+    const trayIconManager = new TrayIconManager(tray, true, 'unsecured');
     const macEventMonitor = new NSEventMonitor();
     const eventMask = NSEventMask.leftMouseDown | NSEventMask.rightMouseDown;
 
     // add IPC handler to change tray icon from renderer
     ipcMain.on('changeTrayIcon', (_: Event, type: TrayIconType) => trayIconManager.iconType = type);
+    ipcMain.on('changeTrayIconColor', (_: Event, color: boolean) => trayIconManager.iconColor = color);
 
     ipcMain.on('collect-logs', (event, id, toRedact) => {
       log.info('Collecting logs in', appDelegate._logFileLocation);

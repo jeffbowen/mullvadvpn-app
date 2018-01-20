@@ -1,5 +1,6 @@
 // @flow
 
+import { ipcRenderer } from 'electron';
 import { log } from '../lib/platform';
 import { IpcFacade, RealIpc } from './ipc-facade';
 import accountActions from '../redux/account/actions';
@@ -403,6 +404,17 @@ export class Backend {
     this._store.dispatch(
       settingsActions.updateAllowLan(allowLan)
     );
+  }
+
+  async setColorIcons(colorIcons: boolean) {
+    try {
+      this._store.dispatch(
+        settingsActions.updateColorIcons(colorIcons)
+      );
+      ipcRenderer.send('changeTrayIconColor', colorIcons);
+    } catch(e) {
+      log.error('Failed to change the color icons setting: ', e.message);
+    }
   }
 
   async fetchSecurityState() {

@@ -8,7 +8,9 @@ import styles from './PreferencesStyles';
 
 export type PreferencesProps = {
   allowLan: boolean;
+  colorIcons: boolean;
   onChangeAllowLan: (boolean) => void;
+  onChangeColorIcons: (boolean) => void;
   onClose: () => void;
 };
 
@@ -46,6 +48,17 @@ export default class Preferences extends Component {
                   <Text style={ styles.preferences__cell_footer_label }>
                     { 'Allows access to other devices on the same network for sharing, printing etc.' }
                   </Text>
+                </View>
+              </View>
+
+              <View style={ styles.preferences__content }>
+                <View style={ styles.preferences__cell }>
+                  <View style={ styles.preferences__cell_label_container }>
+                    <Text style={ styles.preferences__cell_label }>Color menu bar icons</Text>
+                  </View>
+                  <View style={ styles.preferences__cell_accessory }>
+                    <Switch isOn={ this.props.colorIcons } onChange={ this.props.onChangeColorIcons } />
+                  </View>
                 </View>
               </View>
             </View>

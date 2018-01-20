@@ -17,7 +17,12 @@ export type UpdateAllowLanAction = {
   allowLan: boolean,
 };
 
-export type SettingsAction = UpdateRelayAction | UpdateRelayLocationsAction | UpdateAllowLanAction;
+export type UpdateColorIconsAction = {
+  type: 'UPDATE_COLOR_ICONS',
+  colorIcons: boolean,
+}
+
+export type SettingsAction = UpdateRelayAction | UpdateRelayLocationsAction | UpdateAllowLanAction | UpdateColorIconsAction;
 
 function updateRelay(relay: RelaySettingsRedux): UpdateRelayAction {
   return {
@@ -40,4 +45,11 @@ function updateAllowLan(allowLan: boolean): UpdateAllowLanAction {
   };
 }
 
-export default { updateRelay, updateRelayLocations, updateAllowLan };
+function updateColorIcons(colorIcons: boolean): UpdateColorIconsAction {
+  return {
+    type: 'UPDATE_COLOR_ICONS',
+    colorIcons: colorIcons,
+  }
+}
+
+export default { updateRelay, updateRelayLocations, updateAllowLan, updateColorIcons };
