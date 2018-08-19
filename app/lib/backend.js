@@ -138,6 +138,12 @@ export class Backend {
       log.error('Failed to fetch the LAN sharing policy: ', e.message);
     }
 
+    // try {
+    //   await this._fetchColorIcons();
+    // } catch(e) {
+    //   log.error('Failed to fetch the color icons setting: ', e.message);
+    // }
+//
     await this._fetchAccountHistory();
   }
 
@@ -416,6 +422,12 @@ export class Backend {
       log.error('Failed to change the color icons setting: ', e.message);
     }
   }
+
+  // async _fetchColorIcons() {
+  //   this._store.dispatch(
+  //     settingsActions.updateColorIcons(colorIcons)
+  //   );
+  // }
 
   async fetchSecurityState() {
     await this._ensureAuthenticated();
